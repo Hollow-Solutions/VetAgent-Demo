@@ -6,32 +6,30 @@ import {
   TrendingDown, Download, ChevronLeft, ChevronRight, X,
   MessageCircle, Phone, Mail, MapPin, FileText, Save,
   Building2, Users, Lock, ArrowLeft, Filter, Clock,
-  Edit, MoreVertical
+  Edit, MoreVertical, Check, Shield, Wifi, Paperclip,
+  StickyNote, Activity, Pill, Dog, Cat, Bird, Trash2,
+  UserPlus, Send, ToggleLeft, ToggleRight, Key, CreditCard as CardIcon,
+  Package as PackageIcon, RefreshCw, ChevronUp
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine
 } from "recharts";
 
-// ─── DESIGN TOKENS (V2 palette) ───────────────────────────
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --primary: #085041;
-    --primary-mid: #1D9E75;
-    --primary-light: #E1F5EE;
-    --primary-text: #085041;
+    --primary: #085041; --primary-mid: #1D9E75; --primary-light: #E1F5EE; --primary-text: #085041;
     --amber-bg: #FAEEDA; --amber-text: #633806; --amber-border: #EF9F27;
     --red-bg: #FCEBEB; --red-text: #791F1F;
     --blue-bg: #E6F1FB; --blue-text: #0C447C;
     --gray-bg: #F1EFE8; --gray-text: #5F5E5A;
+    --green-bg: #F0FDF4; --green-text: #166534;
     --page-bg: #F5F5F3; --surface: #FFFFFF;
     --border: rgba(0,0,0,0.09);
     --text-primary: #1A1A18; --text-secondary: #5F5E5A; --text-tertiary: #888780;
-    --sidebar: #085041;
-    --font: 'DM Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
+    --sidebar: #085041; --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
   }
   body { font-family: var(--font); background: var(--page-bg); color: var(--text-primary); font-size: 14px; }
   input, select, textarea, button { font-family: var(--font); }
@@ -51,11 +49,55 @@ const statusStyles = {
 };
 function StatusBadge({ status }) {
   const s = statusStyles[status] || { bg: "#F1EFE8", text: "#5F5E5A" };
+  return <span style={{ background: s.bg, color: s.text, padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500, whiteSpace: "nowrap" }}>{status}</span>;
+}
+
+// ─── MODAL ─────────────────────────────────────────────────
+function Modal({ open, onClose, title, children, width = 520 }) {
+  if (!open) return null;
   return (
-    <span style={{ background: s.bg, color: s.text, padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500, whiteSpace: "nowrap" }}>
-      {status}
-    </span>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.25)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}
+      onClick={onClose}>
+      <div style={{ background: "#fff", borderRadius: 12, width, maxWidth: "90vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}
+        onClick={e => e.stopPropagation()}>
+        <div style={{ padding: "18px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: 600, fontSize: 15 }}>{title}</span>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: "var(--text-tertiary)" }}><X size={18} /></button>
+        </div>
+        <div style={{ padding: 20 }}>{children}</div>
+      </div>
+    </div>
   );
+}
+
+// ─── FORM FIELD ────────────────────────────────────────────
+function Field({ label, required, children }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6, color: "var(--text-primary)" }}>
+        {label}{required && <span style={{ color: "var(--red-text)", marginLeft: 3 }}>*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+const inputStyle = { width: "100%", height: 36, padding: "0 10px", border: "1px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", background: "#fff" };
+const selectStyle = { ...inputStyle };
+const taStyle = { width: "100%", padding: "8px 10px", border: "1px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" };
+
+// ─── SHARED HELPERS ────────────────────────────────────────
+const sp = (n = 1) => <div style={{ height: n * 8 }} />;
+function Card({ children, style = {} }) {
+  return <div style={{ background: "#fff", borderRadius: 10, border: "1px solid var(--border)", ...style }}>{children}</div>;
+}
+function Btn({ children, variant = "primary", style = {}, onClick }) {
+  const base = { height: 34, padding: "0 14px", borderRadius: 7, fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, border: "none" };
+  const variants = {
+    primary: { background: "var(--primary)", color: "#fff" },
+    outline: { background: "#fff", color: "var(--text-primary)", border: "1px solid var(--border)" },
+    danger: { background: "var(--red-bg)", color: "var(--red-text)", border: "1px solid #f5c0c0" },
+  };
+  return <button style={{ ...base, ...variants[variant], ...style }} onClick={onClick}>{children}</button>;
 }
 
 // ─── SIDEBAR ───────────────────────────────────────────────
@@ -69,19 +111,17 @@ const navItems = [
   { id: "reportes", label: "Reportes", icon: BarChart3 },
   { id: "configuracion", label: "Configuración", icon: Settings },
 ];
-
 function Sidebar({ active, setActive }) {
   const [branchOpen, setBranchOpen] = useState(false);
   return (
     <div style={{ width: 220, background: "var(--sidebar)", color: "#fff", display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 }}>
-      {/* Logo */}
       <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--primary-mid)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <PawPrint size={18} />
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>Clínica Veterinaria</div>
+            <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>VetAgent CR</div>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", lineHeight: 1.2 }}>San José, CR</div>
           </div>
         </div>
@@ -95,30 +135,25 @@ function Sidebar({ active, setActive }) {
             {["Sede Central", "Sede Escazú", "Sede Santa Ana"].map((b, i) => (
               <button key={b} onClick={() => setBranchOpen(false)}
                 style={{ width: "100%", textAlign: "left", padding: "7px 12px", background: "none", border: "none", color: i === 0 ? "var(--primary-mid)" : "rgba(255,255,255,0.75)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-                {i === 0 && "✓"} {b}
+                {i === 0 && <Check size={12} />}{b}
               </button>
             ))}
           </div>
         )}
       </div>
-
-      {/* Nav */}
       <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
         {navItems.map(item => {
           const isActive = active === item.id;
           const Icon = item.icon;
           return (
             <button key={item.id} onClick={() => setActive(item.id)}
-              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", background: isActive ? "rgba(255,255,255,0.12)" : "none", border: "none", color: isActive ? "#fff" : "rgba(255,255,255,0.72)", fontSize: 13, cursor: "pointer", textAlign: "left", position: "relative", transition: "all 0.15s" }}>
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", background: isActive ? "rgba(255,255,255,0.12)" : "none", border: "none", color: isActive ? "#fff" : "rgba(255,255,255,0.72)", fontSize: 13, cursor: "pointer", textAlign: "left", position: "relative" }}>
               {isActive && <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "var(--primary-mid)", borderRadius: "0 2px 2px 0" }} />}
-              <Icon size={17} />
-              {item.label}
+              <Icon size={17} />{item.label}
             </button>
           );
         })}
       </nav>
-
-      {/* User */}
       <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--primary-mid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600 }}>MP</div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -133,8 +168,7 @@ function Sidebar({ active, setActive }) {
 
 // ─── TOPBAR ────────────────────────────────────────────────
 const pageTitles = { dashboard: "Inicio", agenda: "Agenda", pacientes: "Pacientes", clientes: "Clientes", inventario: "Inventario", facturacion: "Facturación", reportes: "Reportes", configuracion: "Configuración" };
-
-function Topbar({ active, setActive }) {
+function Topbar({ active }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const notifs = [
     { icon: "🔴", text: "Vacuna de Rex vence mañana", time: "hace 2h" },
@@ -143,7 +177,7 @@ function Topbar({ active, setActive }) {
   ];
   return (
     <div style={{ height: 52, background: "#fff", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", flexShrink: 0 }}>
-      <div style={{ fontSize: 15, fontWeight: 500 }}>{pageTitles[active]}</div>
+      <div style={{ fontSize: 15, fontWeight: 500 }}>{pageTitles[active] || "VetAgent CR"}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ position: "relative" }}>
           <Search size={15} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" }} />
@@ -161,10 +195,7 @@ function Topbar({ active, setActive }) {
               {notifs.map((n, i) => (
                 <div key={i} style={{ padding: "10px 14px", display: "flex", gap: 8, borderBottom: i < notifs.length - 1 ? "1px solid var(--border)" : "none" }}>
                   <span>{n.icon}</span>
-                  <div>
-                    <div style={{ fontSize: 12 }}>{n.text}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>{n.time}</div>
-                  </div>
+                  <div><div style={{ fontSize: 12 }}>{n.text}</div><div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>{n.time}</div></div>
                 </div>
               ))}
               <div style={{ padding: "8px 14px" }}>
@@ -181,26 +212,12 @@ function Topbar({ active, setActive }) {
   );
 }
 
-// ─── CARD WRAPPER ──────────────────────────────────────────
-function Card({ children, style = {} }) {
-  return <div style={{ background: "#fff", borderRadius: 10, border: "1px solid var(--border)", ...style }}>{children}</div>;
-}
-function Btn({ children, variant = "primary", style = {}, onClick }) {
-  const base = { height: 34, padding: "0 14px", borderRadius: 7, fontSize: 13, fontWeight: 500, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, border: "none", transition: "opacity 0.15s" };
-  const variants = {
-    primary: { background: "var(--primary)", color: "#fff" },
-    outline: { background: "#fff", color: "var(--text-primary)", border: "1px solid var(--border)" },
-    ghost: { background: "none", color: "var(--primary-mid)", border: "none" },
-  };
-  return <button style={{ ...base, ...variants[variant], ...style }} onClick={onClick}>{children}</button>;
-}
-
 // ─── DASHBOARD ─────────────────────────────────────────────
 const dashAppts = [
   { time: "08:00", pet: "Max", breed: "Golden Retriever", owner: "Carlos Mora", service: "Consulta general", status: "CONFIRMADA" },
   { time: "09:00", pet: "Luna", breed: "Gato Persa", owner: "Ana Quesada", service: "Vacunación", status: "CONFIRMADA" },
   { time: "09:30", pet: "Rocky", breed: "Bulldog Francés", owner: "Luis Jiménez", service: "Control post-cirugía", status: "PENDIENTE" },
-  { time: "11:00", pet: null, breed: null, owner: null, service: "Disponible", status: "EMPTY" },
+  { time: "11:00", pet: null, service: "Disponible", status: "EMPTY" },
   { time: "15:30", pet: "Thor", breed: "Labrador", owner: "Marco Solano", service: "Baño y corte", status: "EN CONSULTA" },
   { time: "16:30", pet: "Mia", breed: "Chihuahua", owner: "Sofía Castro", service: "Desparasitación", status: "PENDIENTE" },
   { time: "17:00", pet: "Bella", breed: "Schnauzer", owner: "Patricia Rojas", service: "Consulta general", status: "CONFIRMADA" },
@@ -217,8 +234,8 @@ const weekOccupancy = [
   { day: "Jue 26", count: 11, max: 15, pct: 73 },
   { day: "Vie 27", count: 6, max: 15, pct: 40 },
 ];
-
 function Dashboard({ setActive }) {
+  const [showNewCita, setShowNewCita] = useState(false);
   const stats = [
     { label: "Citas hoy", value: "12", sub: "↑ 3 más que ayer", color: "var(--primary-mid)" },
     { label: "Por confirmar", value: "4", sub: "Requieren atención", color: "var(--amber-border)", icon: <AlertTriangle size={15} color="var(--amber-border)" /> },
@@ -227,7 +244,7 @@ function Dashboard({ setActive }) {
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Stats */}
+      <ModalNuevaCita open={showNewCita} onClose={() => setShowNewCita(false)} />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
         {stats.map((s, i) => (
           <Card key={i} style={{ padding: 18 }}>
@@ -240,26 +257,23 @@ function Dashboard({ setActive }) {
           </Card>
         ))}
       </div>
-
-      {/* Main grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 14 }}>
-        {/* Agenda */}
         <Card style={{ padding: 18 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontWeight: 600, fontSize: 15 }}>Agenda de hoy</span>
               <span style={{ background: "var(--primary-light)", color: "var(--primary-text)", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 500 }}>Sede Central</span>
             </div>
-            <Btn onClick={() => setActive("agenda")}><Plus size={14} /> Nueva cita</Btn>
+            <Btn onClick={() => setShowNewCita(true)}><Plus size={14} /> Nueva cita</Btn>
           </div>
           {dashAppts.map((apt, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < dashAppts.length - 1 ? "1px solid var(--border)" : "none", position: "relative", background: apt.status === "EN CONSULTA" ? "var(--primary-light)" : "none", borderRadius: apt.status === "EN CONSULTA" ? 6 : 0, paddingLeft: apt.status === "EN CONSULTA" ? 10 : 0 }}>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < dashAppts.length - 1 ? "1px solid var(--border)" : "none", position: "relative", background: apt.status === "EN CONSULTA" ? "var(--primary-light)" : "none", borderRadius: 6, paddingLeft: apt.status === "EN CONSULTA" ? 10 : 0 }}>
               {apt.status === "EN CONSULTA" && <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "var(--primary-mid)", borderRadius: 2 }} />}
               <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-secondary)", width: 44, flexShrink: 0 }}>{apt.time}</span>
               {apt.status === "EMPTY" ? (
                 <div style={{ flex: 1, border: "2px dashed var(--border)", borderRadius: 6, padding: "8px 12px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Slot disponible</span>
-                  <button onClick={() => setActive("agenda")} style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}>Agendar →</button>
+                  <button onClick={() => setShowNewCita(true)} style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}>Agendar →</button>
                 </div>
               ) : (
                 <>
@@ -278,10 +292,7 @@ function Dashboard({ setActive }) {
             <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>12 citas en total</span>
           </div>
         </Card>
-
-        {/* Right panel */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {/* Alerts */}
           <Card style={{ padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <span style={{ fontWeight: 600, fontSize: 14 }}>Alertas activas</span>
@@ -299,8 +310,6 @@ function Dashboard({ setActive }) {
             ))}
             <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer", marginTop: 4 }}>Ver las 7 alertas →</button>
           </Card>
-
-          {/* Occupancy */}
           <Card style={{ padding: 16 }}>
             <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Ocupación esta semana</div>
             {weekOccupancy.map((d, i) => (
@@ -315,20 +324,53 @@ function Dashboard({ setActive }) {
               </div>
             ))}
           </Card>
-
-          {/* Quick actions */}
           <Card style={{ padding: 16 }}>
             <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Accesos rápidos</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {["Nueva cita", "Nuevo paciente", "Vacunas pendientes", "Reporte del día"].map((a, i) => (
-                <button key={i} onClick={() => setActive(i < 1 ? "agenda" : i === 1 ? "pacientes" : i === 2 ? "reportes" : "reportes")}
-                  style={{ height: 36, border: "1px solid var(--border)", borderRadius: 7, background: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 500 }}>{a}</button>
+              {[["Nueva cita", () => setShowNewCita(true)], ["Nuevo paciente", () => setActive("pacientes")], ["Vacunas pendientes", () => setActive("reportes")], ["Reporte del día", () => setActive("reportes")]].map(([a, fn], i) => (
+                <button key={i} onClick={fn} style={{ height: 36, border: "1px solid var(--border)", borderRadius: 7, background: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 500 }}>{a}</button>
               ))}
             </div>
           </Card>
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── MODAL NUEVA CITA ──────────────────────────────────────
+function ModalNuevaCita({ open, onClose }) {
+  return (
+    <Modal open={open} onClose={onClose} title="Nueva cita" width={540}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <Field label="Mascota" required>
+          <select style={selectStyle}><option>Seleccionar mascota...</option><option>Max (Carlos Mora)</option><option>Luna (Ana Quesada)</option><option>Rocky (Luis Jiménez)</option></select>
+        </Field>
+        <Field label="Veterinario" required>
+          <select style={selectStyle}><option>Dra. María Pérez</option><option>Dr. Carlos Vega</option><option>Dr. Andrés Mora</option></select>
+        </Field>
+        <Field label="Fecha" required>
+          <input type="date" defaultValue="2026-03-25" style={inputStyle} />
+        </Field>
+        <Field label="Hora" required>
+          <input type="time" defaultValue="09:00" style={inputStyle} />
+        </Field>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Tipo de servicio" required>
+            <select style={selectStyle}><option>Consulta general</option><option>Vacunación</option><option>Desparasitación</option><option>Control post-cirugía</option><option>Baño y corte</option><option>Cirugía</option></select>
+          </Field>
+        </div>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Notas">
+            <textarea rows={3} placeholder="Notas opcionales sobre la cita..." style={taStyle} />
+          </Field>
+        </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+        <Btn variant="outline" onClick={onClose}>Cancelar</Btn>
+        <Btn onClick={onClose}><Check size={14} /> Crear cita</Btn>
+      </div>
+    </Modal>
   );
 }
 
@@ -355,9 +397,10 @@ const getStatusBg = (s) => ({ "CONFIRMADA": "var(--primary-light)", "PENDIENTE":
 
 function Agenda() {
   const [view, setView] = useState("week");
+  const [showModal, setShowModal] = useState(false);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {/* Controls */}
+      <ModalNuevaCita open={showModal} onClose={() => setShowModal(false)} />
       <Card style={{ padding: "12px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -376,20 +419,15 @@ function Agenda() {
               ))}
             </div>
             <select style={{ height: 32, padding: "0 10px", border: "1px solid var(--border)", borderRadius: 7, fontSize: 12, background: "#fff" }}>
-              <option>Todos los veterinarios</option>
-              <option>Dra. María Pérez</option>
-              <option>Dr. Carlos Vega</option>
+              <option>Todos los veterinarios</option><option>Dra. María Pérez</option><option>Dr. Carlos Vega</option>
             </select>
-            <Btn><Plus size={14} /> Nueva cita</Btn>
+            <Btn onClick={() => setShowModal(true)}><Plus size={14} /> Nueva cita</Btn>
           </div>
         </div>
       </Card>
-
-      {/* Grid */}
       <Card style={{ overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <div style={{ minWidth: 860 }}>
-            {/* Header */}
             <div style={{ display: "grid", gridTemplateColumns: "52px repeat(6,1fr)", borderBottom: "1px solid var(--border)" }}>
               <div style={{ padding: 10 }} />
               {weekDays.map((d, i) => (
@@ -399,10 +437,7 @@ function Agenda() {
                 </div>
               ))}
             </div>
-
-            {/* Body */}
             <div style={{ position: "relative", display: "grid", gridTemplateColumns: "52px repeat(6,1fr)", height: `${13 * 72}px` }}>
-              {/* Time labels */}
               <div>
                 {timeSlots.map((t, i) => (
                   <div key={i} style={{ height: 72, borderBottom: "1px solid var(--border)", display: "flex", alignItems: "flex-start", justifyContent: "flex-end", paddingRight: 6, paddingTop: 4 }}>
@@ -410,12 +445,11 @@ function Agenda() {
                   </div>
                 ))}
               </div>
-
-              {/* Day columns */}
               {weekDays.map((_, di) => (
                 <div key={di} style={{ position: "relative", background: di === 0 ? "rgba(225,245,238,0.3)" : "none" }}>
                   {timeSlots.map((_, ti) => (
-                    <div key={ti} style={{ height: 72, borderBottom: "1px solid var(--border)", borderLeft: "1px solid var(--border)" }} />
+                    <div key={ti} style={{ height: 72, borderBottom: "1px solid var(--border)", borderLeft: "1px solid var(--border)", cursor: "pointer" }}
+                      onClick={() => setShowModal(true)} />
                   ))}
                   {agendaAppts.filter(a => a.day === di).map((apt, ai) => {
                     const top = getPos(apt.time);
@@ -430,8 +464,6 @@ function Agenda() {
                   })}
                 </div>
               ))}
-
-              {/* Current time line */}
               <div style={{ position: "absolute", left: 52, right: 0, height: 2, background: "var(--primary-mid)", top: getPos("15:30"), pointerEvents: "none", zIndex: 5 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--primary-mid)", position: "absolute", left: -4, top: -3 }} />
               </div>
@@ -455,9 +487,41 @@ const patientsData = [
   { id: 8, name: "Rex", emoji: "🐕", breed: "Pastor Alemán", owner: "Pedro Vargas", vet: "Dr. Mora", lastVisit: "28/02/2026", alert: { text: "Rabia 2 días", type: "red" } },
 ];
 
+function ModalNuevoPaciente({ open, onClose }) {
+  return (
+    <Modal open={open} onClose={onClose} title="Nuevo paciente" width={560}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <Field label="Nombre" required><input style={inputStyle} placeholder="Nombre de la mascota" /></Field>
+        <Field label="Especie" required>
+          <select style={selectStyle}><option>Perro</option><option>Gato</option><option>Ave</option><option>Conejo</option><option>Otro</option></select>
+        </Field>
+        <Field label="Raza"><input style={inputStyle} placeholder="Ej: Golden Retriever" /></Field>
+        <Field label="Sexo" required>
+          <select style={selectStyle}><option>Macho</option><option>Hembra</option></select>
+        </Field>
+        <Field label="Fecha de nacimiento"><input type="date" style={inputStyle} /></Field>
+        <Field label="Peso (kg)"><input type="number" style={inputStyle} placeholder="0.0" /></Field>
+        <Field label="Color"><input style={inputStyle} placeholder="Ej: Dorado" /></Field>
+        <Field label="Microchip"><input style={inputStyle} placeholder="Número de microchip" /></Field>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Dueño" required>
+            <select style={selectStyle}><option>Seleccionar dueño...</option><option>Carlos Mora</option><option>Ana Quesada</option><option>Luis Jiménez</option></select>
+          </Field>
+        </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+        <Btn variant="outline" onClick={onClose}>Cancelar</Btn>
+        <Btn onClick={onClose}><Check size={14} /> Registrar paciente</Btn>
+      </div>
+    </Modal>
+  );
+}
+
 function Pacientes({ setActive, setDetailPet }) {
+  const [showModal, setShowModal] = useState(false);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <ModalNuevoPaciente open={showModal} onClose={() => setShowModal(false)} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: 18, fontWeight: 600 }}>Pacientes</div>
@@ -468,11 +532,9 @@ function Pacientes({ setActive, setDetailPet }) {
             <Search size={14} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" }} />
             <input placeholder="Nombre, microchip, raza, dueño..." style={{ height: 34, width: 280, paddingLeft: 30, paddingRight: 10, border: "1px solid var(--border)", borderRadius: 7, fontSize: 12, outline: "none" }} />
           </div>
-          <Btn><Plus size={14} /> Nuevo paciente</Btn>
+          <Btn onClick={() => setShowModal(true)}><Plus size={14} /> Nuevo paciente</Btn>
         </div>
       </div>
-
-      {/* Filter tabs */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: 6 }}>
           {[["Todos", 247], ["Perros", 168], ["Gatos", 61], ["Otros", 18]].map(([label, count], i) => (
@@ -490,7 +552,6 @@ function Pacientes({ setActive, setDetailPet }) {
           </label>
         </div>
       </div>
-
       <Card>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -542,11 +603,9 @@ function Pacientes({ setActive, setDetailPet }) {
   );
 }
 
-// ─── FICHA PACIENTE (V2 layout) ────────────────────────────
+// ─── FICHA PACIENTE ────────────────────────────────────────
 const weightData = [
-  { date: "Ene 2025", weight: 26.2 },
-  { date: "Jun 2025", weight: 27.8 },
-  { date: "Mar 2026", weight: 28.5 },
+  { date: "Ene 2025", weight: 26.2 }, { date: "Jun 2025", weight: 27.8 }, { date: "Mar 2026", weight: 28.5 },
 ];
 const historyEntries = [
   { date: "20/03/2026", type: "Consulta general", vet: "Dra. María Pérez", branch: "Sede Central",
@@ -561,14 +620,66 @@ const vaccinations = [
   { name: "Polivalente", date: "15/01/2026", product: "Nobivac", lote: "A089", vet: "Dra. Pérez", nextDose: "15/01/2027", status: "AL DÍA" },
   { name: "Bordetella", date: "20/06/2025", product: "Bronchi", lote: "C12", vet: "Dra. Pérez", nextDose: "20/06/2026", status: "87 DÍAS" },
 ];
+const desparasitaciones = [
+  { tipo: "Interna", producto: "Drontal Plus", fecha: "01/01/2026", proxima: "01/04/2026", status: "PRÓXIMA" },
+  { tipo: "Externa", producto: "Frontline Spot", fecha: "15/02/2026", proxima: "15/03/2026", status: "VENCIDA" },
+];
+const archivos = [
+  { nombre: "Radiografía_torax_ene2026.jpg", tipo: "Imagen", fecha: "15/01/2026", size: "2.4 MB" },
+  { nombre: "Examen_sangre_mar2026.pdf", tipo: "PDF", fecha: "20/03/2026", size: "340 KB" },
+  { nombre: "Consentimiento_cirugia.pdf", tipo: "PDF", fecha: "05/09/2025", size: "128 KB" },
+];
+const notas = [
+  { autor: "Dra. María Pérez", fecha: "20/03/2026", texto: "Paciente muy nervioso en consulta, requiere manejo especial. Recomendar llegada 10 min antes para aclimatación." },
+  { autor: "Dr. Carlos Vega", fecha: "05/09/2025", texto: "Dueño muy atento y responsable. Confirma siempre las citas. Mascota tolera bien la anestesia local." },
+];
 
 function FichaPaciente({ pet, onBack }) {
   const [tab, setTab] = useState("historial");
+  const [showNuevaCita, setShowNuevaCita] = useState(false);
+  const [showConsulta, setShowConsulta] = useState(false);
+  const [showVacuna, setShowVacuna] = useState(false);
+  const [expandedEntry, setExpandedEntry] = useState(null);
   const p = pet || { name: "Max", emoji: "🐕", breed: "Golden Retriever", owner: "Carlos Mora" };
   const tabs = ["historial", "vacunas", "desparasitación", "peso", "archivos", "notas"];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <ModalNuevaCita open={showNuevaCita} onClose={() => setShowNuevaCita(false)} />
+
+      {/* Modal nueva consulta */}
+      <Modal open={showConsulta} onClose={() => setShowConsulta(false)} title="Registrar consulta" width={560}>
+        <Field label="Motivo de consulta" required><input style={inputStyle} placeholder="Motivo de la visita" /></Field>
+        <Field label="Signos clínicos"><textarea rows={2} style={taStyle} placeholder="Signos observados..." /></Field>
+        <Field label="Diagnóstico" required><textarea rows={2} style={taStyle} placeholder="Diagnóstico del veterinario..." /></Field>
+        <Field label="Tratamiento"><input style={inputStyle} placeholder="Tratamiento indicado" /></Field>
+        <Field label="Medicamentos"><input style={inputStyle} placeholder="Ej: Amoxicilina 500mg · 1c/12h · 7 días" /></Field>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <Field label="Peso registrado (kg)"><input type="number" style={inputStyle} placeholder="0.0" /></Field>
+          <Field label="Veterinario"><select style={selectStyle}><option>Dra. María Pérez</option><option>Dr. Carlos Vega</option></select></Field>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+          <Btn variant="outline" onClick={() => setShowConsulta(false)}>Cancelar</Btn>
+          <Btn onClick={() => setShowConsulta(false)}><Check size={14} /> Guardar consulta</Btn>
+        </div>
+      </Modal>
+
+      {/* Modal registrar vacuna */}
+      <Modal open={showVacuna} onClose={() => setShowVacuna(false)} title="Registrar vacuna" width={480}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <Field label="Vacuna" required><input style={inputStyle} placeholder="Ej: Rabia" /></Field>
+          <Field label="Producto"><input style={inputStyle} placeholder="Ej: Rabisin" /></Field>
+          <Field label="Número de lote"><input style={inputStyle} placeholder="Ej: B45" /></Field>
+          <Field label="Veterinario"><select style={selectStyle}><option>Dra. María Pérez</option><option>Dr. Carlos Vega</option></select></Field>
+          <Field label="Fecha de aplicación" required><input type="date" style={inputStyle} /></Field>
+          <Field label="Próxima dosis" required><input type="date" style={inputStyle} /></Field>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+          <Btn variant="outline" onClick={() => setShowVacuna(false)}>Cancelar</Btn>
+          <Btn onClick={() => setShowVacuna(false)}><Check size={14} /> Registrar vacuna</Btn>
+        </div>
+      </Modal>
+
       {/* Top bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -581,32 +692,25 @@ function FichaPaciente({ pet, onBack }) {
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <Btn><Calendar size={14} /> Nueva cita para {p.name}</Btn>
+          <Btn onClick={() => setShowNuevaCita(true)}><Calendar size={14} /> Nueva cita para {p.name}</Btn>
           <Btn variant="outline"><Edit size={14} /> Editar</Btn>
           <Btn variant="outline" style={{ width: 34, padding: 0, justifyContent: "center" }}><MoreVertical size={14} /></Btn>
         </div>
       </div>
 
-      {/* Two column layout */}
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, alignItems: "start" }}>
-
         {/* LEFT PANEL */}
         <Card style={{ padding: 18 }}>
-          {/* Avatar + name */}
           <div style={{ textAlign: "center", marginBottom: 18 }}>
             <div style={{ width: 64, height: 64, borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 10px" }}>{p.emoji}</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>{p.name}</div>
             <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 3 }}>{p.breed} · Macho</div>
             <span style={{ display: "inline-block", marginTop: 8, background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 500 }}>Activo</span>
           </div>
-
-          {/* Microchip */}
           <div style={{ background: "var(--page-bg)", borderRadius: 7, padding: "10px 12px", marginBottom: 14 }}>
             <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 3 }}>Microchip</div>
             <div style={{ fontSize: 12, fontWeight: 500, fontFamily: "var(--mono)" }}>#985112004567890</div>
           </div>
-
-          {/* Data */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
             {[["Nacimiento", "15/06/2020"], ["Edad", "5 años 9 meses"], ["Peso actual", "28.5 kg"], ["Color", "Dorado"], ["Esterilizado", "No"]].map(([k, v]) => (
               <div key={k}>
@@ -615,20 +719,18 @@ function FichaPaciente({ pet, onBack }) {
               </div>
             ))}
           </div>
-
-          {/* Owner */}
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginBottom: 14 }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Dueño</div>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
               <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>CM</div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>{p.owner}</div>
+                <div style={{ fontSize: 13, fontWeight: 500 }}>{p.owner || "Carlos Mora"}</div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>8845-2211</div>
                 <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>carlos.mora@gmail.com</div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
-              {[[MessageCircle, "WhatsApp"], [Phone, "Llamar"], [Mail, "Email"]].map(([Icon, label], i) => (
+              {[[MessageCircle], [Phone], [Mail]].map(([Icon], i) => (
                 <button key={i} style={{ flex: 1, height: 34, border: "1px solid var(--border)", borderRadius: 7, background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon size={15} color="var(--primary-mid)" />
                 </button>
@@ -636,8 +738,6 @@ function FichaPaciente({ pet, onBack }) {
             </div>
             <button style={{ marginTop: 10, background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer", width: "100%", textAlign: "left" }}>Ver perfil completo →</button>
           </div>
-
-          {/* Next appointment */}
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Próxima cita</div>
             <div style={{ background: "var(--primary-light)", borderRadius: 7, padding: "10px 12px" }}>
@@ -648,13 +748,12 @@ function FichaPaciente({ pet, onBack }) {
           </div>
         </Card>
 
-        {/* RIGHT PANEL — tabs */}
+        {/* RIGHT PANEL */}
         <Card style={{ padding: 18 }}>
-          {/* Tabs */}
           <div style={{ borderBottom: "1px solid var(--border)", marginBottom: 18, display: "flex", gap: 18 }}>
             {tabs.map(t => (
               <button key={t} onClick={() => setTab(t)}
-                style={{ padding: "0 0 12px", fontSize: 13, background: "none", border: "none", cursor: "pointer", color: tab === t ? "var(--primary-mid)" : "var(--text-secondary)", fontWeight: tab === t ? 600 : 400, borderBottom: tab === t ? "2px solid var(--primary-mid)" : "2px solid transparent", textTransform: "capitalize", transition: "all 0.15s" }}>
+                style={{ padding: "0 0 12px", fontSize: 13, background: "none", border: "none", cursor: "pointer", color: tab === t ? "var(--primary-mid)" : "var(--text-secondary)", fontWeight: tab === t ? 600 : 400, borderBottom: tab === t ? "2px solid var(--primary-mid)" : "2px solid transparent", textTransform: "capitalize" }}>
                 {t}
               </button>
             ))}
@@ -663,29 +762,39 @@ function FichaPaciente({ pet, onBack }) {
           {/* HISTORIAL */}
           {tab === "historial" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Btn onClick={() => setShowConsulta(true)}><Plus size={14} /> Registrar consulta</Btn>
+              </div>
               {historyEntries.map((e, i) => (
                 <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 9, padding: 14 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: expandedEntry === i ? 10 : 0 }}>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 600 }}>{e.date} · {e.type}</div>
                       <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>{e.vet} · {e.branch}</div>
                     </div>
-                    <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}>expandir</button>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }} onClick={() => setExpandedEntry(expandedEntry === i ? null : i)}>
+                        {expandedEntry === i ? "colapsar" : "expandir"}
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
-                    {Object.entries(e.details).map(([k, v]) => (
-                      <div key={k} style={{ fontSize: 13 }}>
-                        <span style={{ color: "var(--text-secondary)" }}>{k}: </span>
-                        <span>{v}</span>
+                  {expandedEntry === i && (
+                    <>
+                      <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
+                        {Object.entries(e.details).map(([k, v]) => (
+                          <div key={k} style={{ fontSize: 13 }}>
+                            <span style={{ color: "var(--text-secondary)" }}>{k}: </span><span>{v}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  <div style={{ marginTop: 10, display: "flex", gap: 12 }}>
-                    <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                      <FileText size={13} /> Ver receta PDF
-                    </button>
-                    {e.type === "Cirugía menor" && <button style={{ background: "none", border: "none", color: "var(--text-secondary)", fontSize: 12, cursor: "pointer" }}>2 adjuntos</button>}
-                  </div>
+                      <div style={{ marginTop: 10, display: "flex", gap: 12 }}>
+                        <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                          <FileText size={13} /> Ver receta PDF
+                        </button>
+                        {e.type === "Cirugía menor" && <button style={{ background: "none", border: "none", color: "var(--text-secondary)", fontSize: 12, cursor: "pointer" }}>2 adjuntos</button>}
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
               <button style={{ width: "100%", padding: "11px 0", border: "1px solid var(--border)", borderRadius: 8, background: "#fff", fontSize: 12, color: "var(--text-secondary)", cursor: "pointer" }}>
@@ -704,6 +813,9 @@ function FichaPaciente({ pet, onBack }) {
                   <button style={{ marginTop: 8, padding: "5px 12px", background: "#fff", border: "1px solid var(--red-text)", color: "var(--red-text)", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>Contactar por WhatsApp</button>
                 </div>
               </div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Btn onClick={() => setShowVacuna(true)}><Plus size={14} /> Registrar vacuna</Btn>
+              </div>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
@@ -721,7 +833,7 @@ function FichaPaciente({ pet, onBack }) {
                       <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{v.vet}</td>
                       <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{v.nextDose}</td>
                       <td style={{ padding: "10px 0" }}>
-                        <span style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 4, color: v.status === "VENCIDA" ? "var(--red-text)" : v.status === "AL DÍA" ? "#16a34a" : "var(--amber-text)" }}>
+                        <span style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 4, color: v.status === "VENCIDA" ? "var(--red-text)" : v.status === "AL DÍA" ? "#16a34a" : "var(--amber-text)" }}>
                           {v.status === "VENCIDA" ? "🔴" : v.status === "AL DÍA" ? "✓" : "⚠"} {v.status}
                         </span>
                       </td>
@@ -729,7 +841,44 @@ function FichaPaciente({ pet, onBack }) {
                   ))}
                 </tbody>
               </table>
-              <Btn style={{ width: "100%", justifyContent: "center" }}><Plus size={14} /> Registrar vacuna</Btn>
+            </div>
+          )}
+
+          {/* DESPARASITACIÓN */}
+          {tab === "desparasitación" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>Control de desparasitación</div>
+                <Btn><Plus size={14} /> Registrar desparasitación</Btn>
+              </div>
+              <div style={{ background: "var(--amber-bg)", border: "1px solid #f0d090", borderRadius: 8, padding: "12px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+                <AlertTriangle size={16} color="var(--amber-border)" />
+                <div style={{ fontSize: 13, color: "var(--amber-text)" }}>La desparasitación externa venció el 15/03/2026. Requiere atención.</div>
+              </div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                    {["Tipo", "Producto", "Fecha aplic.", "Próxima dosis", "Estado"].map((h, i) => (
+                      <th key={i} style={{ padding: "8px 0", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {desparasitaciones.map((d, i) => (
+                    <tr key={i} style={{ borderBottom: i < desparasitaciones.length - 1 ? "1px solid var(--border)" : "none" }}>
+                      <td style={{ padding: "10px 0", fontSize: 13, fontWeight: 500 }}>{d.tipo}</td>
+                      <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{d.producto}</td>
+                      <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{d.fecha}</td>
+                      <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{d.proxima}</td>
+                      <td style={{ padding: "10px 0" }}>
+                        <span style={{ fontSize: 12, color: d.status === "VENCIDA" ? "var(--red-text)" : "var(--amber-text)" }}>
+                          {d.status === "VENCIDA" ? "🔴" : "⚠"} {d.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 
@@ -743,6 +892,8 @@ function FichaPaciente({ pet, onBack }) {
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis domain={[24, 32]} tick={{ fontSize: 11 }} />
                   <Tooltip />
+                  <ReferenceLine y={25} stroke="#4ade80" strokeDasharray="3 3" label={{ value: "Mín", fontSize: 10 }} />
+                  <ReferenceLine y={34} stroke="#4ade80" strokeDasharray="3 3" label={{ value: "Máx", fontSize: 10 }} />
                   <Line type="monotone" dataKey="weight" stroke="var(--primary-mid)" strokeWidth={2} dot={{ fill: "var(--primary-mid)", r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
@@ -752,15 +903,80 @@ function FichaPaciente({ pet, onBack }) {
               <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: "12px 14px" }}>
                 <span style={{ fontSize: 13, color: "#166534" }}><strong>BCS: 5/9</strong> — Peso ideal (Body Condition Score)</span>
               </div>
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 10 }}>Historial de registros</div>
+                {weightData.map((w, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < weightData.length - 1 ? "1px solid var(--border)" : "none", fontSize: 13 }}>
+                    <span style={{ color: "var(--text-secondary)" }}>{w.date}</span>
+                    <span style={{ fontWeight: 500 }}>{w.weight} kg</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* OTHER TABS */}
-          {(tab === "desparasitación" || tab === "archivos" || tab === "notas") && (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <FileText size={36} color="var(--text-tertiary)" style={{ margin: "0 auto 10px" }} />
-              <div style={{ fontWeight: 600, marginBottom: 4, textTransform: "capitalize" }}>{tab}</div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Sección disponible próximamente</div>
+          {/* ARCHIVOS */}
+          {tab === "archivos" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>Archivos adjuntos</div>
+                <Btn><Plus size={14} /> Subir archivo</Btn>
+              </div>
+              <div style={{ border: "2px dashed var(--border)", borderRadius: 9, padding: "24px 20px", textAlign: "center", color: "var(--text-tertiary)", fontSize: 13 }}>
+                <Paperclip size={24} style={{ margin: "0 auto 8px", display: "block" }} />
+                Arrastrá archivos aquí o hacé clic en "Subir archivo"
+              </div>
+              {archivos.map((a, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", border: "1px solid var(--border)", borderRadius: 8 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 7, background: a.tipo === "PDF" ? "var(--red-bg)" : "var(--blue-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <FileText size={18} color={a.tipo === "PDF" ? "var(--red-text)" : "var(--blue-text)"} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>{a.nombre}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{a.fecha} · {a.size}</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}>Descargar</button>
+                    <button style={{ background: "none", border: "none", color: "var(--red-text)", fontSize: 12, cursor: "pointer" }}>Eliminar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* NOTAS */}
+          {tab === "notas" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Notas internas</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>Solo visibles para el personal de la clínica</div>
+                </div>
+                <Btn><Plus size={14} /> Agregar nota</Btn>
+              </div>
+              <div style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+                <textarea rows={3} placeholder="Escribir una nota interna sobre este paciente..." style={{ ...taStyle, border: "none", borderBottom: "1px solid var(--border)", borderRadius: 0 }} />
+                <div style={{ padding: "8px 12px", background: "var(--page-bg)", display: "flex", justifyContent: "flex-end" }}>
+                  <Btn style={{ height: 28, fontSize: 12 }}><Send size={12} /> Guardar nota</Btn>
+                </div>
+              </div>
+              {notas.map((n, i) => (
+                <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 9, padding: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600 }}>
+                        {n.autor.split(" ").map(w => w[0]).join("").slice(0, 2)}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 500 }}>{n.autor}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{n.fecha}</div>
+                      </div>
+                    </div>
+                    <button style={{ background: "none", border: "none", color: "var(--red-text)", fontSize: 11, cursor: "pointer" }}>Eliminar</button>
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.6 }}>{n.texto}</div>
+                </div>
+              ))}
             </div>
           )}
         </Card>
@@ -779,12 +995,123 @@ const clientsData = [
   { id: 6, name: "Carmen Rodríguez", phone: "+506 3333-4444", email: "crodriguez@email.com", address: "San José, Desamparados", pets: 2, lastVisit: "20/03/2026" },
   { id: 7, name: "Pedro Vargas", phone: "+506 2222-3333", email: "pvargas@email.com", address: "San José, Tibás", pets: 1, lastVisit: "18/03/2026" },
 ];
+
+function ModalNuevoCliente({ open, onClose }) {
+  return (
+    <Modal open={open} onClose={onClose} title="Nuevo cliente" width={520}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Nombre completo" required><input style={inputStyle} placeholder="Nombre completo del dueño" /></Field>
+        </div>
+        <Field label="Teléfono" required><input style={inputStyle} placeholder="+506 0000-0000" /></Field>
+        <Field label="Correo electrónico"><input type="email" style={inputStyle} placeholder="correo@email.com" /></Field>
+        <Field label="Cédula / Pasaporte"><input style={inputStyle} placeholder="Número de identificación" /></Field>
+        <Field label="Dirección"><input style={inputStyle} placeholder="Ej: San José, Escazú" /></Field>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+        <Btn variant="outline" onClick={onClose}>Cancelar</Btn>
+        <Btn onClick={onClose}><Check size={14} /> Registrar cliente</Btn>
+      </div>
+    </Modal>
+  );
+}
+
+function PerfilCliente({ client, onBack }) {
+  const clientPets = patientsData.slice(0, client.pets);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <button onClick={onBack} style={{ width: 34, height: 34, borderRadius: 7, border: "1px solid var(--border)", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <ArrowLeft size={16} />
+        </button>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 600 }}>{client.name}</div>
+          <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Clientes / {client.name}</div>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <Card style={{ padding: 18 }}>
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <div style={{ width: 60, height: 60, borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 600, color: "var(--primary)", margin: "0 auto 10px" }}>
+                {client.name.split(" ").map(n => n[0]).join("")}
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 600 }}>{client.name}</div>
+              <span style={{ background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 500 }}>Cliente activo</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {[[Phone, client.phone], [Mail, client.email], [MapPin, client.address]].map(([Icon, val], i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text-secondary)" }}>
+                  <Icon size={15} color="var(--primary-mid)" />{val}
+                </div>
+              ))}
+            </div>
+            <div style={{ borderTop: "1px solid var(--border)", marginTop: 14, paddingTop: 14, display: "flex", gap: 6 }}>
+              {[[MessageCircle, "WhatsApp"], [Phone, "Llamar"], [Mail, "Email"]].map(([Icon, label], i) => (
+                <button key={i} style={{ flex: 1, height: 34, border: "1px solid var(--border)", borderRadius: 7, background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4, fontSize: 11 }}>
+                  <Icon size={13} color="var(--primary-mid)" />
+                </button>
+              ))}
+            </div>
+          </Card>
+          <Card style={{ padding: 16 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 10 }}>Resumen</div>
+            {[["Mascotas registradas", client.pets], ["Visitas totales", 8], ["Última visita", client.lastVisit], ["Cliente desde", "Ene 2024"]].map(([k, v]) => (
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--border)", fontSize: 13 }}>
+                <span style={{ color: "var(--text-secondary)" }}>{k}</span>
+                <span style={{ fontWeight: 500 }}>{v}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <Card style={{ padding: 16 }}>
+            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Mascotas</div>
+            {clientPets.map((p, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < clientPets.length - 1 ? "1px solid var(--border)" : "none" }}>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{p.emoji}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{p.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{p.breed} · Última visita: {p.lastVisit}</div>
+                </div>
+                {p.alert && <span style={{ fontSize: 11, color: p.alert.type === "red" ? "var(--red-text)" : "var(--amber-text)" }}><AlertTriangle size={12} /></span>}
+                <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}>Ver ficha →</button>
+              </div>
+            ))}
+          </Card>
+          <Card style={{ padding: 16 }}>
+            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Historial de visitas</div>
+            {[
+              { date: "24/03/2026", pet: "Max", service: "Consulta general", amount: "₡18,500", status: "Pagada" },
+              { date: "18/03/2026", pet: "Luna", service: "Vacunación", amount: "₡15,000", status: "Pagada" },
+              { date: "05/01/2026", pet: "Max", service: "Desparasitación", amount: "₡8,000", status: "Pagada" },
+            ].map((v, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < 2 ? "1px solid var(--border)" : "none" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{v.pet} — {v.service}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{v.date}</div>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{v.amount}</div>
+                <span style={{ background: "#dcfce7", color: "#166534", padding: "2px 8px", borderRadius: 999, fontSize: 11 }}>{v.status}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Clientes() {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  if (selectedClient) return <PerfilCliente client={selectedClient} onBack={() => setSelectedClient(null)} />;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <ModalNuevoCliente open={showModal} onClose={() => setShowModal(false)} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div><div style={{ fontSize: 18, fontWeight: 600 }}>Clientes</div><div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>Gestiona la información de los dueños</div></div>
-        <Btn><Plus size={14} /> Nuevo cliente</Btn>
+        <Btn onClick={() => setShowModal(true)}><Plus size={14} /> Nuevo cliente</Btn>
       </div>
       <Card>
         <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", display: "flex", gap: 8 }}>
@@ -822,7 +1149,9 @@ function Clientes() {
                   <span style={{ background: "var(--primary-light)", color: "var(--primary-text)", padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500 }}>{c.pets} {c.pets === 1 ? "mascota" : "mascotas"}</span>
                 </td>
                 <td style={{ padding: "12px 16px", fontSize: 12, color: "var(--text-secondary)" }}>{c.lastVisit}</td>
-                <td style={{ padding: "12px 16px" }}><button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer", fontWeight: 500 }}>Ver detalles</button></td>
+                <td style={{ padding: "12px 16px" }}>
+                  <button onClick={() => setSelectedClient(c)} style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer", fontWeight: 500 }}>Ver detalles</button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -851,14 +1180,42 @@ const invData = [
   { name: "Guantes latex M", cat: "Material médico", stock: 5, min: 20, unit: "cajas", price: "₡6,200", status: "critico" },
   { name: "Collar antipulgas", cat: "Accesorios", stock: 23, min: 15, unit: "unidades", price: "₡7,800", status: "ok" },
 ];
+function ModalNuevoProducto({ open, onClose }) {
+  return (
+    <Modal open={open} onClose={onClose} title="Agregar producto" width={480}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Nombre del producto" required><input style={inputStyle} placeholder="Ej: Vacuna Rabia" /></Field>
+        </div>
+        <Field label="Categoría" required>
+          <select style={selectStyle}><option>Medicamentos</option><option>Alimentos</option><option>Material médico</option><option>Accesorios</option></select>
+        </Field>
+        <Field label="Unidad de medida" required>
+          <select style={selectStyle}><option>dosis</option><option>cajas</option><option>tabletas</option><option>sacos</option><option>unidades</option></select>
+        </Field>
+        <Field label="Stock actual" required><input type="number" style={inputStyle} placeholder="0" /></Field>
+        <Field label="Stock mínimo" required><input type="number" style={inputStyle} placeholder="0" /></Field>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Precio unitario" required><input style={inputStyle} placeholder="₡0" /></Field>
+        </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+        <Btn variant="outline" onClick={onClose}>Cancelar</Btn>
+        <Btn onClick={onClose}><Check size={14} /> Agregar producto</Btn>
+      </div>
+    </Modal>
+  );
+}
 function Inventario() {
+  const [showModal, setShowModal] = useState(false);
   const crit = invData.filter(i => i.status === "critico").length;
   const bajo = invData.filter(i => i.status === "bajo").length;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <ModalNuevoProducto open={showModal} onClose={() => setShowModal(false)} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div><div style={{ fontSize: 18, fontWeight: 600 }}>Inventario</div><div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>Productos y medicamentos</div></div>
-        <Btn><Plus size={14} /> Agregar producto</Btn>
+        <Btn onClick={() => setShowModal(true)}><Plus size={14} /> Agregar producto</Btn>
       </div>
       {(crit > 0 || bajo > 0) && (
         <div style={{ display: "grid", gridTemplateColumns: crit > 0 && bajo > 0 ? "1fr 1fr" : "1fr", gap: 10 }}>
@@ -867,7 +1224,7 @@ function Inventario() {
             <div><div style={{ fontWeight: 600, fontSize: 13, color: "var(--red-text)" }}>Stock crítico</div><div style={{ fontSize: 12, color: "var(--red-text)" }}>{crit} producto(s) necesita(n) reposición urgente</div></div>
           </div>}
           {bajo > 0 && <div style={{ background: "var(--amber-bg)", border: "1px solid #f0d090", borderRadius: 9, padding: "12px 14px", display: "flex", alignItems: "center", gap: 10 }}>
-            <Package size={18} color="var(--amber-border)" />
+            <PackageIcon size={18} color="var(--amber-border)" />
             <div><div style={{ fontWeight: 600, fontSize: 13, color: "var(--amber-text)" }}>Stock bajo</div><div style={{ fontSize: 12, color: "var(--amber-text)" }}>{bajo} producto(s) por debajo del mínimo</div></div>
           </div>}
         </div>
@@ -923,13 +1280,53 @@ const factsData = [
   { id: "FAC-2026-006", client: "Carmen Rodríguez", patient: "Bella", date: "20/03/2026", amount: "₡35,000", status: "Vencida", method: "Transferencia" },
   { id: "FAC-2025-087", client: "Pedro Vargas", patient: "Rex", date: "18/03/2026", amount: "₡15,000", status: "Pagada", method: "Efectivo" },
 ];
+function ModalNuevaFactura({ open, onClose }) {
+  return (
+    <Modal open={open} onClose={onClose} title="Nueva factura" width={520}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <Field label="Cliente" required>
+          <select style={selectStyle}><option>Seleccionar cliente...</option><option>Carlos Mora</option><option>Ana Quesada</option></select>
+        </Field>
+        <Field label="Paciente" required>
+          <select style={selectStyle}><option>Seleccionar paciente...</option><option>Max</option><option>Luna</option></select>
+        </Field>
+        <div style={{ gridColumn: "1/-1" }}>
+          <Field label="Servicios">
+            <div style={{ border: "1px solid var(--border)", borderRadius: 7, overflow: "hidden" }}>
+              {[["Consulta general", "₡12,000"], ["Vacunación", "₡8,500"]].map(([s, p], i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", borderBottom: "1px solid var(--border)", fontSize: 13 }}>
+                  <span>{s}</span><span style={{ fontWeight: 500 }}>{p}</span>
+                </div>
+              ))}
+              <div style={{ padding: "8px 12px", display: "flex", justifyContent: "space-between", fontWeight: 600 }}>
+                <span>Total</span><span>₡20,500</span>
+              </div>
+            </div>
+          </Field>
+        </div>
+        <Field label="Método de pago" required>
+          <select style={selectStyle}><option>SINPE Móvil</option><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select>
+        </Field>
+        <Field label="Fecha">
+          <input type="date" defaultValue="2026-03-24" style={inputStyle} />
+        </Field>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+        <Btn variant="outline" onClick={onClose}>Cancelar</Btn>
+        <Btn onClick={onClose}><Check size={14} /> Crear factura</Btn>
+      </div>
+    </Modal>
+  );
+}
 function Facturacion() {
+  const [showModal, setShowModal] = useState(false);
   const statusColor = (s) => s === "Pagada" ? { bg: "#dcfce7", text: "#166534" } : s === "Pendiente" ? { bg: "var(--amber-bg)", text: "var(--amber-text)" } : { bg: "var(--red-bg)", text: "var(--red-text)" };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <ModalNuevaFactura open={showModal} onClose={() => setShowModal(false)} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div><div style={{ fontSize: 18, fontWeight: 600 }}>Facturación</div><div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>Gestiona facturas y pagos</div></div>
-        <Btn><Plus size={14} /> Nueva factura</Btn>
+        <Btn onClick={() => setShowModal(true)}><Plus size={14} /> Nueva factura</Btn>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
         {[["Total mes", "₡163,000", CreditCard, "var(--primary-mid)"], ["Pagadas", "5", FileText, "#16a34a"], ["Pendientes", "1", Clock, "var(--amber-border)"], ["Vencidas", "1", AlertTriangle, "var(--red-text)"]].map(([label, val, Icon, color], i) => (
@@ -1004,6 +1401,22 @@ const vaccAlerts = [
   { pet: "Kira", species: "Perro", owner: "Patricia Rojas", phone: "6677-8899", vaccine: "Rabia", expiry: "05/04/2026", days: "12 días", type: "amber" },
   { pet: "Coco", species: "Gato", owner: "Ana Quesada", phone: "7012-3344", vaccine: "Bordetella", expiry: "11/04/2026", days: "18 días", type: "amber" },
 ];
+const citasData = [
+  { month: "Ene", total: 85, completadas: 78, canceladas: 7 },
+  { month: "Feb", total: 92, completadas: 85, canceladas: 7 },
+  { month: "Mar", total: 98, completadas: 91, canceladas: 7 },
+];
+const pacientesEspecie = [
+  { name: "Perros", value: 168, color: "#1D9E75" },
+  { name: "Gatos", value: 61, color: "#378ADD" },
+  { name: "Otros", value: 18, color: "#EF9F27" },
+];
+const rendimientoVets = [
+  { vet: "Dra. Pérez", citas: 145, ingresos: 420000, satisfaccion: 98 },
+  { vet: "Dr. Vega", citas: 98, ingresos: 285000, satisfaccion: 96 },
+  { vet: "Dr. Mora", citas: 67, ingresos: 198000, satisfaccion: 94 },
+];
+
 function Reportes() {
   const [tab, setTab] = useState("ingresos");
   const tabs = ["ingresos", "citas", "pacientes", "vacunas", "rendimiento"];
@@ -1028,26 +1441,25 @@ function Reportes() {
           ))}
         </div>
         <div style={{ padding: 20 }}>
+
+          {/* INGRESOS */}
           {tab === "ingresos" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
-                {[["Ingresos totales", "₡1,197,000", "↑ 18% vs Q1 2025"], ["Ticket promedio", "₡13,450", "por cita"], ["Mejor mes", "Marzo", "₡487,000"]].map(([l, v, s], i) => (
+                {[["Ingresos totales", "₡1,197,000", "↑ 18% vs Q1 2025", "#16a34a"], ["Ticket promedio", "₡13,450", "por cita", "var(--text-secondary)"], ["Mejor mes", "Marzo", "₡487,000", "var(--text-secondary)"]].map(([l, v, s, sc], i) => (
                   <div key={i} style={{ background: "var(--page-bg)", borderRadius: 9, padding: 16 }}>
                     <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>{l}</div>
                     <div style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{v}</div>
-                    <div style={{ fontSize: 12, color: i === 0 ? "#16a34a" : "var(--text-secondary)" }}>{s}</div>
+                    <div style={{ fontSize: 12, color: sc }}>{s}</div>
                   </div>
                 ))}
               </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Ingresos por mes y sede</div>
+              <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Ingresos por mes y sede</div>
                 <ResponsiveContainer width="100%" height={240}>
                   <LineChart data={revData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Legend />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip /><Legend />
                     <Line type="monotone" dataKey="central" stroke="#1D9E75" strokeWidth={2} name="Sede Central" />
                     <Line type="monotone" dataKey="escazu" stroke="#378ADD" strokeWidth={2} name="Sede Escazú" />
                     <Line type="monotone" dataKey="santaAna" stroke="#EF9F27" strokeWidth={2} name="Sede Santa Ana" />
@@ -1055,29 +1467,109 @@ function Reportes() {
                 </ResponsiveContainer>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Por método de pago</div>
+                <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Por método de pago</div>
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart><Pie data={piePay} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value" label={e => `${e.name} ${e.value}%`}>
                       {piePay.map((e, i) => <Cell key={i} fill={e.color} />)}
                     </Pie><Tooltip /></PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Top servicios</div>
+                <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Top servicios</div>
                   <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={topSvcs} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                      <XAxis type="number" tick={{ fontSize: 10 }} />
-                      <YAxis dataKey="service" type="category" tick={{ fontSize: 10 }} width={100} />
-                      <Tooltip />
-                      <Bar dataKey="amount" fill="#1D9E75" radius={[0, 4, 4, 0]} />
+                      <XAxis type="number" tick={{ fontSize: 10 }} /><YAxis dataKey="service" type="category" tick={{ fontSize: 10 }} width={100} />
+                      <Tooltip /><Bar dataKey="amount" fill="#1D9E75" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
             </div>
           )}
+
+          {/* CITAS */}
+          {tab === "citas" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+                {[["Total citas", "275", "Q1 2026"], ["Completadas", "254", "92.4%"], ["Canceladas", "21", "7.6%"], ["Ausentismo", "8", "2.9%"]].map(([l, v, s], i) => (
+                  <div key={i} style={{ background: "var(--page-bg)", borderRadius: 9, padding: 16 }}>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>{l}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{v}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{s}</div>
+                  </div>
+                ))}
+              </div>
+              <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Citas por mes</div>
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={citasData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip /><Legend />
+                    <Bar dataKey="completadas" fill="#1D9E75" name="Completadas" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="canceladas" fill="#FCEBEB" name="Canceladas" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Servicios más solicitados</div>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                      {["Servicio", "Cantidad", "Ingresos generados"].map((h, i) => (
+                        <th key={i} style={{ padding: "8px 0", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topSvcs.map((s, i) => (
+                      <tr key={i} style={{ borderBottom: i < topSvcs.length - 1 ? "1px solid var(--border)" : "none" }}>
+                        <td style={{ padding: "10px 0", fontSize: 13, fontWeight: 500 }}>{s.service}</td>
+                        <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{Math.floor(s.amount / 2500)} servicios</td>
+                        <td style={{ padding: "10px 0", fontSize: 13, fontWeight: 600 }}>₡{s.amount.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* PACIENTES */}
+          {tab === "pacientes" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                {[["Pacientes activos", "247", "en la clínica"], ["Nuevos este mes", "12", "↓ 3% vs anterior"], ["Con alertas activas", "23", "requieren seguimiento"]].map(([l, v, s], i) => (
+                  <div key={i} style={{ background: "var(--page-bg)", borderRadius: 9, padding: 16 }}>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>{l}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{v}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{s}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Distribución por especie</div>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart><Pie data={pacientesEspecie} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={2} dataKey="value" label={e => `${e.name} (${e.value})`}>
+                      {pacientesEspecie.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    </Pie><Tooltip /></PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Razas más atendidas</div>
+                  {[["Golden Retriever", 28], ["Gato Doméstico", 22], ["Labrador Retriever", 19], ["Chihuahua", 15], ["Bulldog Francés", 12]].map(([raza, count], i) => (
+                    <div key={i} style={{ marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                        <span>{raza}</span><span style={{ color: "var(--text-secondary)" }}>{count} pacientes</span>
+                      </div>
+                      <div style={{ height: 6, background: "var(--gray-bg)", borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{ width: `${(count / 28) * 100}%`, height: "100%", background: "var(--primary-mid)", borderRadius: 999 }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VACUNAS */}
           {tab === "vacunas" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1089,6 +1581,11 @@ function Reportes() {
                   <AlertTriangle size={22} color="var(--amber-border)" />
                   <div><div style={{ fontSize: 22, fontWeight: 600, color: "var(--amber-text)" }}>35 vacunas</div><div style={{ fontSize: 12, color: "var(--amber-text)" }}>Vencen en próximos 30 días</div></div>
                 </div>
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                {["Todas", "Vencidas", "Próximos 7 días", "Próximos 30 días"].map((f, i) => (
+                  <button key={i} style={{ height: 32, padding: "0 12px", borderRadius: 7, fontSize: 12, cursor: "pointer", background: i === 0 ? "var(--primary)" : "#fff", color: i === 0 ? "#fff" : "var(--text-primary)", border: `1px solid ${i === 0 ? "var(--primary)" : "var(--border)"}` }}>{f}</button>
+                ))}
               </div>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
@@ -1119,11 +1616,54 @@ function Reportes() {
               </table>
             </div>
           )}
-          {(tab === "citas" || tab === "pacientes" || tab === "rendimiento") && (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <FileText size={40} color="var(--text-tertiary)" style={{ margin: "0 auto 12px" }} />
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Reporte en desarrollo</div>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Disponible próximamente</div>
+
+          {/* RENDIMIENTO */}
+          {tab === "rendimiento" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                {[["Tasa de retención", "78%", "clientes que volvieron en 90 días"], ["Tiempo promedio consulta", "28 min", "por cita"], ["Ocupación promedio", "72%", "de la capacidad semanal"]].map(([l, v, s], i) => (
+                  <div key={i} style={{ background: "var(--page-bg)", borderRadius: 9, padding: 16 }}>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>{l}</div>
+                    <div style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{v}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{s}</div>
+                  </div>
+                ))}
+              </div>
+              <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Rendimiento por veterinario</div>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--page-bg)" }}>
+                      {["Veterinario", "Citas realizadas", "Ingresos generados", "Satisfacción"].map((h, i) => (
+                        <th key={i} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rendimientoVets.map((v, i) => (
+                      <tr key={i} style={{ borderBottom: i < rendimientoVets.length - 1 ? "1px solid var(--border)" : "none" }}>
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600 }}>
+                              {v.vet.split(" ").map(w => w[0]).join("").slice(0, 2)}
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 500 }}>{v.vet}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 16px", fontSize: 13 }}>{v.citas} citas</td>
+                        <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 600 }}>₡{v.ingresos.toLocaleString()}</td>
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ height: 6, width: 80, background: "var(--gray-bg)", borderRadius: 999, overflow: "hidden" }}>
+                              <div style={{ width: `${v.satisfaccion}%`, height: "100%", background: "var(--primary-mid)", borderRadius: 999 }} />
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 500 }}>{v.satisfaccion}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -1133,8 +1673,19 @@ function Reportes() {
 }
 
 // ─── CONFIGURACIÓN ─────────────────────────────────────────
+const usersConfig = [
+  { id: "mp", name: "Dra. María Pérez", role: "Administradora", branch: "Todas las sedes", lastAccess: "Ahora mismo", status: "Activo" },
+  { id: "cv", name: "Dr. Carlos Vega", role: "Veterinario", branch: "Sede Central", lastAccess: "Hace 2h", status: "Activo" },
+  { id: "am", name: "Dr. Andrés Mora", role: "Veterinario", branch: "Sede Escazú", lastAccess: "Ayer 18:30", status: "Activo" },
+  { id: "ag", name: "Ana García", role: "Recepcionista", branch: "Sede Central", lastAccess: "Hace 30 min", status: "Activo" },
+  { id: "inv", name: "carlos.vega2@...", role: "Veterinario", branch: "Sede Central", lastAccess: "—", status: "Pendiente" },
+];
+
 function Configuracion() {
   const [section, setSection] = useState("general");
+  const [showInvite, setShowInvite] = useState(false);
+  const [notifs, setNotifs] = useState({ email: true, whatsapp: true, vacunas: true, citas: true, stock: false });
+  const [twofa, setTwofa] = useState(false);
   const secs = [
     { id: "general", label: "Información general", icon: Building2 },
     { id: "usuarios", label: "Usuarios y permisos", icon: Users },
@@ -1143,8 +1694,28 @@ function Configuracion() {
     { id: "facturacion", label: "Facturación", icon: CreditCard },
   ];
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
   return (
     <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 16 }}>
+      {/* Modal invitar usuario */}
+      <Modal open={showInvite} onClose={() => setShowInvite(false)} title="Invitar usuario" width={460}>
+        <Field label="Correo electrónico" required><input type="email" style={inputStyle} placeholder="usuario@ejemplo.com" /></Field>
+        <Field label="Rol" required>
+          <select style={selectStyle}><option>Veterinario</option><option>Recepcionista</option><option>Administrador</option></select>
+        </Field>
+        <Field label="Sucursal asignada">
+          <select style={selectStyle}><option>Sede Central</option><option>Sede Escazú</option><option>Sede Santa Ana</option></select>
+        </Field>
+        <Field label="Especialidad (opcional)"><input style={inputStyle} placeholder="Ej: Cirugía, Medicina interna..." /></Field>
+        <div style={{ background: "var(--primary-light)", borderRadius: 7, padding: "10px 12px", fontSize: 12, color: "var(--primary-text)", marginBottom: 14 }}>
+          Se enviará un email de invitación con instrucciones para crear contraseña.
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <Btn variant="outline" onClick={() => setShowInvite(false)}>Cancelar</Btn>
+          <Btn onClick={() => setShowInvite(false)}><Send size={14} /> Enviar invitación</Btn>
+        </div>
+      </Modal>
+
       <Card style={{ padding: 8 }}>
         {secs.map(s => {
           const Icon = s.icon;
@@ -1156,7 +1727,10 @@ function Configuracion() {
           );
         })}
       </Card>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+        {/* GENERAL */}
         {section === "general" && (
           <>
             <Card style={{ padding: 20 }}>
@@ -1164,12 +1738,12 @@ function Configuracion() {
               {[["Nombre de la clínica", "text", "Clínica Veterinaria San José"], ["Teléfono principal", "tel", "+506 2222-3333"], ["Correo electrónico", "email", "info@clinicavetsj.com"], ["Cédula jurídica", "text", "3-101-123456"]].map(([label, type, val], i) => (
                 <div key={i} style={{ marginBottom: 14 }}>
                   <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>{label}</label>
-                  <input type={type} defaultValue={val} style={{ width: "100%", height: 36, padding: "0 10px", border: "1px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                  <input type={type} defaultValue={val} style={inputStyle} />
                 </div>
               ))}
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6 }}>Dirección</label>
-                <textarea rows={3} defaultValue={"San José, Costa Rica\nAvenida Central, Calle 10\n100 metros norte de la plaza"} style={{ width: "100%", padding: "8px 10px", border: "1px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
+                <textarea rows={3} defaultValue={"San José, Costa Rica\nAvenida Central, Calle 10\n100 metros norte de la plaza"} style={taStyle} />
               </div>
             </Card>
             <Card style={{ padding: 20 }}>
@@ -1188,12 +1762,198 @@ function Configuracion() {
             </div>
           </>
         )}
-        {section !== "general" && (
-          <Card style={{ padding: 40, textAlign: "center" }}>
-            <Settings size={40} color="var(--text-tertiary)" style={{ margin: "0 auto 12px" }} />
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>{secs.find(s => s.id === section)?.label}</div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Sección disponible próximamente</div>
+
+        {/* USUARIOS */}
+        {section === "usuarios" && (
+          <>
+            <Card style={{ padding: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>Usuarios y roles</div>
+                <Btn onClick={() => setShowInvite(true)}><UserPlus size={14} /> Invitar usuario</Btn>
+              </div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--page-bg)" }}>
+                    {["Usuario", "Rol", "Sucursal", "Último acceso", "Estado", ""].map((h, i) => (
+                      <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersConfig.map((u, i) => (
+                    <tr key={i} style={{ borderBottom: i < usersConfig.length - 1 ? "1px solid var(--border)" : "none" }}>
+                      <td style={{ padding: "12px 14px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: u.status === "Pendiente" ? "var(--gray-bg)" : "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "var(--primary)" }}>
+                            {u.status === "Pendiente" ? "?" : u.id.toUpperCase().slice(0, 2)}
+                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 500 }}>{u.name}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "12px 14px", fontSize: 12, color: "var(--text-secondary)" }}>{u.role}</td>
+                      <td style={{ padding: "12px 14px", fontSize: 12, color: "var(--text-secondary)" }}>{u.branch}</td>
+                      <td style={{ padding: "12px 14px", fontSize: 12, color: "var(--text-secondary)" }}>{u.lastAccess}</td>
+                      <td style={{ padding: "12px 14px" }}>
+                        <span style={{ background: u.status === "Activo" ? "#dcfce7" : "var(--amber-bg)", color: u.status === "Activo" ? "#166534" : "var(--amber-text)", padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500 }}>{u.status}</span>
+                      </td>
+                      <td style={{ padding: "12px 14px" }}>
+                        {u.status === "Pendiente" ? (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}>Reenviar</button>
+                            <button style={{ background: "none", border: "none", color: "var(--red-text)", fontSize: 12, cursor: "pointer" }}>Cancelar</button>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button style={{ background: "none", border: "none", color: "var(--primary-mid)", fontSize: 12, cursor: "pointer" }}><Edit size={14} /></button>
+                            <button style={{ background: "none", border: "none", color: "var(--text-tertiary)", fontSize: 12, cursor: "pointer" }}><MoreVertical size={14} /></button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+            <Card style={{ padding: 20 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Permisos por rol</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                {[
+                  { role: "Administrador", color: "#085041", perms: [["Reportes financieros", true], ["Gestión de usuarios", true], ["Configuración", true], ["Todas las sucursales", true], ["Expedientes y citas", true]] },
+                  { role: "Veterinario", color: "#1D9E75", perms: [["Reportes financieros", false], ["Gestión de usuarios", false], ["Configuración", false], ["Sucursal asignada", true], ["Expedientes y citas", true]] },
+                  { role: "Recepcionista", color: "#EF9F27", perms: [["Reportes financieros", false], ["Gestión de usuarios", false], ["Expedientes clínicos", false], ["Citas y agenda", true], ["Perfil de clientes", true]] },
+                ].map((r, i) => (
+                  <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 9, padding: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: r.color }} />
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{r.role}</span>
+                    </div>
+                    {r.perms.map(([name, allowed], j) => (
+                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6, color: allowed ? "var(--text-primary)" : "var(--text-tertiary)" }}>
+                        <span style={{ color: allowed ? "#16a34a" : "var(--text-tertiary)" }}>{allowed ? "✓" : "✗"}</span>
+                        {name}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </>
+        )}
+
+        {/* NOTIFICACIONES */}
+        {section === "notificaciones" && (
+          <Card style={{ padding: 20 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Notificaciones</div>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>Configura qué notificaciones se envían y por qué canal.</div>
+            {[
+              ["Recordatorios de citas por email", "email", "Enviar 24h antes de cada cita"],
+              ["Recordatorios por WhatsApp", "whatsapp", "Requiere API de WhatsApp Business activa"],
+              ["Alertas de vacunas próximas a vencer", "vacunas", "Notificar cuando falten 30 días o menos"],
+              ["Confirmación de citas", "citas", "Al crear o modificar una cita"],
+              ["Alertas de stock bajo en inventario", "stock", "Al llegar al mínimo configurado"],
+            ].map(([label, key, desc], i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: i < 4 ? "1px solid var(--border)" : "none" }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{label}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>{desc}</div>
+                </div>
+                <button onClick={() => setNotifs(n => ({ ...n, [key]: !n[key] }))}
+                  style={{ background: notifs[key] ? "var(--primary)" : "var(--gray-bg)", border: "none", borderRadius: 999, width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                  <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: notifs[key] ? 23 : 3, transition: "left 0.2s" }} />
+                </button>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+              <Btn><Save size={14} /> Guardar preferencias</Btn>
+            </div>
           </Card>
+        )}
+
+        {/* SEGURIDAD */}
+        {section === "seguridad" && (
+          <>
+            <Card style={{ padding: 20 }}>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Seguridad de la cuenta</div>
+              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>Gestiona la seguridad del acceso a VetAgent CR.</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>Autenticación de dos factores (2FA)</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>Protege tu cuenta con Google Authenticator</div>
+                </div>
+                <button onClick={() => setTwofa(!twofa)}
+                  style={{ background: twofa ? "var(--primary)" : "var(--gray-bg)", border: "none", borderRadius: 999, width: 44, height: 24, cursor: "pointer", position: "relative" }}>
+                  <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: twofa ? 23 : 3, transition: "left 0.2s" }} />
+                </button>
+              </div>
+              <div style={{ padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 14 }}>Cambiar contraseña</div>
+                <Field label="Contraseña actual"><input type="password" style={inputStyle} placeholder="••••••••" /></Field>
+                <Field label="Nueva contraseña"><input type="password" style={inputStyle} placeholder="••••••••" /></Field>
+                <Field label="Confirmar nueva contraseña"><input type="password" style={inputStyle} placeholder="••••••••" /></Field>
+                <Btn style={{ marginTop: 4 }}><Key size={14} /> Actualizar contraseña</Btn>
+              </div>
+              <div style={{ padding: "14px 0" }}>
+                <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 6 }}>Sesiones activas</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>Dispositivos con sesión activa en este momento</div>
+                {[["Chrome · Mac · San José, CR", "Ahora mismo", true], ["Safari · iPhone · San José, CR", "Hace 2h", false]].map(([device, time, current], i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: i === 0 ? "1px solid var(--border)" : "none" }}>
+                    <div>
+                      <div style={{ fontSize: 13 }}>{device}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{time}</div>
+                    </div>
+                    {current ? <span style={{ fontSize: 11, background: "#dcfce7", color: "#166534", padding: "2px 8px", borderRadius: 999 }}>Sesión actual</span>
+                      : <button style={{ background: "none", border: "none", color: "var(--red-text)", fontSize: 12, cursor: "pointer" }}>Cerrar sesión</button>}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </>
+        )}
+
+        {/* FACTURACIÓN */}
+        {section === "facturacion" && (
+          <>
+            <Card style={{ padding: 20 }}>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Plan actual</div>
+              <div style={{ background: "var(--primary-light)", borderRadius: 9, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--primary)" }}>Plan Profesional</div>
+                  <div style={{ fontSize: 12, color: "var(--primary-text)", marginTop: 3 }}>₡25,000/mes · Hasta 3 veterinarios · Mascotas ilimitadas</div>
+                </div>
+                <Btn variant="outline">Cambiar plan</Btn>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+                {[["Próxima factura", "24/04/2026"], ["Método de pago", "SINPE Móvil ····5432"], ["Estado", "Al día"], ["Miembro desde", "Ene 2026"]].map(([k, v], i) => (
+                  <div key={i} style={{ padding: "10px 12px", background: "var(--page-bg)", borderRadius: 8 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>{k}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginTop: 3 }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            <Card style={{ padding: 20 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Historial de pagos</div>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                    {["Fecha", "Descripción", "Monto", "Estado"].map((h, i) => (
+                      <th key={i} style={{ padding: "8px 0", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[["24/03/2026", "Plan Profesional — Mar 2026", "₡25,000", "Pagado"], ["24/02/2026", "Plan Profesional — Feb 2026", "₡25,000", "Pagado"], ["24/01/2026", "Plan Profesional — Ene 2026", "₡25,000", "Pagado"]].map(([d, desc, m, s], i) => (
+                    <tr key={i} style={{ borderBottom: i < 2 ? "1px solid var(--border)" : "none" }}>
+                      <td style={{ padding: "10px 0", fontSize: 12, color: "var(--text-secondary)" }}>{d}</td>
+                      <td style={{ padding: "10px 0", fontSize: 13 }}>{desc}</td>
+                      <td style={{ padding: "10px 0", fontSize: 13, fontWeight: 600 }}>{m}</td>
+                      <td style={{ padding: "10px 0" }}><span style={{ background: "#dcfce7", color: "#166534", padding: "2px 8px", borderRadius: 999, fontSize: 11 }}>{s}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+          </>
         )}
       </div>
     </div>
@@ -1226,7 +1986,7 @@ export default function App() {
       <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
         <Sidebar active={active === "fichadetalle" ? "pacientes" : active} setActive={setActive} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <Topbar active={active === "fichadetalle" ? "pacientes" : active} setActive={setActive} />
+          <Topbar active={active === "fichadetalle" ? "pacientes" : active} />
           <main style={{ flex: 1, overflowY: "auto", padding: 20, background: "var(--page-bg)" }}>
             {renderPage()}
           </main>
